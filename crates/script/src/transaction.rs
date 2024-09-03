@@ -26,7 +26,7 @@ pub struct TransactionWithMetadata {
     pub opcode: CallKind,
     #[serde(default = "default_string")]
     pub contract_name: Option<String>,
-    #[serde(default = "default_address")]
+    #[serde(default = "default_address", with = "serialize_address")]
     pub contract_address: Option<Address>,
     #[serde(default = "default_string")]
     pub function: Option<String>,
@@ -45,6 +45,16 @@ fn default_string() -> Option<String> {
 
 fn default_address() -> Option<Address> {
     Some(Address::ZERO)
+}
+
+pub fn serialize_address<S>(address: &Option<Address>, serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    match address {
+        Some(addr) => serializer.serialize_str(&addr.to_string()),
+        None => serializer.serialize_none(),
+    }
 }
 
 fn default_vec_of_strings() -> Option<Vec<String>> {
