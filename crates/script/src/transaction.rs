@@ -6,7 +6,7 @@ use foundry_common::{fmt::format_token_raw, ContractData, TransactionMaybeSigned
 use foundry_evm::{constants::DEFAULT_CREATE2_DEPLOYER, traces::CallTraceDecoder};
 use itertools::Itertools;
 use revm_inspectors::tracing::types::CallKind;
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize, Serializer};
 use std::collections::BTreeMap;
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
@@ -26,7 +26,7 @@ pub struct TransactionWithMetadata {
     pub opcode: CallKind,
     #[serde(default = "default_string")]
     pub contract_name: Option<String>,
-    #[serde(default = "default_address", with = "serialize_address")]
+    #[serde(default = "default_address", serialize_with = "serialize_address")]
     pub contract_address: Option<Address>,
     #[serde(default = "default_string")]
     pub function: Option<String>,
@@ -47,7 +47,7 @@ fn default_address() -> Option<Address> {
     Some(Address::ZERO)
 }
 
-pub fn serialize_address<S>(address: &Option<Address>, serializer: S) -> Result<S::Ok, S::Error>
+fn serialize_address<S>(address: &Option<Address>, serializer: S) -> Result<S::Ok, S::Error>
 where
     S: Serializer,
 {
